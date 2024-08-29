@@ -1,259 +1,114 @@
+"resources": [
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "metadata": {
-    "_generator": {
-      "name": "bicep",
-      "version": "0.26.54.24096",
-      "templateHash": "16694921643873529380"
-    }
+  "apiVersion": "2016-02-01-privatepreview",
+  "name": "[variables('serverName')]",
+  "type": "Microsoft.DBforPostgreSQL/servers",
+  "sku": {
+    "name": "[variables('skuNamePG')]",
+    "tier": "[parameters('postgresPricingTier')]",
+    "capacity": "[parameters('postgresComputeUnit')]",
+    "size": "[mul(parameters('postgresStorageGB'), 1024)]"
   },
-  "parameters": {
-    "serverName": {
-      "type": "string",
-      "metadata": {
-        "description": "Server Name for Azure Database for PostgreSQL"
-      }
-    },
-    "administratorLogin": {
-      "type": "string",
-      "minLength": 1,
-      "metadata": {
-        "description": "Database administrator login name"
-      }
-    },
-    "administratorLoginPassword": {
-      "type": "securestring",
-      "minLength": 8,
-      "metadata": {
-        "description": "Database administrator password"
-      }
-    },
-    "skuCapacity": {
-      "type": "int",
-      "defaultValue": 2,
-      "metadata": {
-        "description": "Azure Database for PostgreSQL compute capacity in vCores (2,4,8,16,32)"
-      }
-    },
-    "skuName": {
-      "type": "string",
-      "defaultValue": "GP_Gen5_2",
-      "metadata": {
-        "description": "Azure Database for PostgreSQL sku name "
-      }
-    },
-    "skuSizeMB": {
-      "type": "int",
-      "defaultValue": 51200,
-      "metadata": {
-        "description": "Azure Database for PostgreSQL Sku Size "
-      }
-    },
-    "skuTier": {
-      "type": "string",
-      "defaultValue": "GeneralPurpose",
-      "allowedValues": [
-        "Basic",
-        "GeneralPurpose",
-        "MemoryOptimized"
-      ],
-      "metadata": {
-        "description": "Azure Database for PostgreSQL pricing tier"
-      }
-    },
-    "skuFamily": {
-      "type": "string",
-      "defaultValue": "Gen5",
-      "metadata": {
-        "description": "Azure Database for PostgreSQL sku family"
-      }
-    },
-    "postgresqlVersion": {
-      "type": "string",
-      "defaultValue": "11",
-      "allowedValues": [
-        "9.5",
-        "9.6",
-        "10",
-        "10.0",
-        "10.2",
-        "11"
-      ],
-      "metadata": {
-        "description": "PostgreSQL version"
-      }
-    },
-    "location": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Location for all resources."
-      }
-    },
-    "backupRetentionDays": {
-      "type": "int",
-      "defaultValue": 7,
-      "metadata": {
-        "description": "PostgreSQL Server backup retention days"
-      }
-    },
-    "geoRedundantBackup": {
-      "type": "string",
-      "defaultValue": "Disabled",
-      "metadata": {
-        "description": "Geo-Redundant Backup setting"
-      }
-    },
-    "virtualNetworkName": {
-      "type": "string",
-      "defaultValue": "azure_postgresql_vnet",
-      "metadata": {
-        "description": "Virtual Network Name"
-      }
-    },
-    "subnetName": {
-      "type": "string",
-      "defaultValue": "azure_postgresql_subnet",
-      "metadata": {
-        "description": "Subnet Name"
-      }
-    },
-    "virtualNetworkRuleName": {
-      "type": "string",
-      "defaultValue": "AllowSubnet",
-      "metadata": {
-        "description": "Virtual Network RuleName"
-      }
-    },
-    "vnetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/16",
-      "metadata": {
-        "description": "Virtual Network Address Prefix"
-      }
-    },
-    "subnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/16",
-      "metadata": {
-        "description": "Subnet Address Prefix"
-      }
-    }
-  },
-  "variables": {
-    "firewallrules": [
-      {
-        "Name": "rule1",
-        "StartIpAddress": "0.0.0.0",
-        "EndIpAddress": "255.255.255.255"
-      },
-      {
-        "Name": "rule2",
-        "StartIpAddress": "0.0.0.0",
-        "EndIpAddress": "255.255.255.255"
-      }
-    ]
+  "location": "[parameters('postgresLocation')]",
+  "properties": {
+    "version": "[parameters('postgresVersion')]",
+    "administratorLogin": "[parameters('postgresAdminLoginName')]",
+    "administratorLoginPassword": "[parameters('postgresAdminPassword')]",
+    "storageMB": "[mul(parameters('postgresStorageGB'), 1024)]"
   },
   "resources": [
     {
-      "type": "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules",
-      "apiVersion": "2017-12-01",
-      "name": "[format('{0}/{1}', parameters('serverName'), parameters('virtualNetworkRuleName'))]",
-      "properties": {
-        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
-        "ignoreMissingVnetServiceEndpoint": true
+      "apiVersion": "2017-04-30-preview",
+      "name": "[variables('databaseName')]",
+      "type": "databases",
+      "location": "[parameters('postgresLocation')]",
+      "tags": {
+        "displayName": "PSQLDatabase"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('serverName'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
-      ]
+        "[resourceId('Microsoft.DBforPostgreSQL/servers', variables('serverName'))]"
+      ],
+      "properties": {
+      }
     },
     {
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2023-09-01",
-      "name": "[parameters('virtualNetworkName')]",
-      "location": "[parameters('location')]",
+      "apiVersion": "2017-04-30-preview",
+      "name": "PSQLServerFirewallRule",
+      "type": "firewallrules",
+      "location": "[parameters('postgresLocation')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/servers', variables('serverName'))]"
+      ],
       "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnetAddressPrefix')]"
+        "endIpAddress": "255.255.255.255",
+        "startIpAddress": "0.0.0.0"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/alertRules",
+      "name": "CPU-Alert",
+      "apiVersion": "2016-03-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/servers', variables('serverName'))]"
+      ],
+      "properties": {
+          "name": "CPU-Alert",
+          "description": "Default alert which notify when cpu percent is greater than 80%",
+          "isEnabled": "true",
+          "condition": {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+              "dataSource": {
+                  "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+                  "resourceUri": "[resourceId('Microsoft.DBforPostgreSQL/servers', variables('serverName'))]",
+                  "metricName": "cpu_percent"
+              },
+              "operator": "GreaterThan",
+              "threshold": "80",
+              "windowSize": "00:05:00",
+              "timeAggregation": "Average"
+          },
+        "actions": [
+          {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+            "sendToServiceOwners": "true",
+            "customEmails": "[variables('customEmails')]"
+          }
+        ]
+      }
+    },
+    {
+        "type": "Microsoft.Insights/alertRules",
+        "name": "Storage-Alert",
+        "apiVersion": "2016-03-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[resourceId('Microsoft.DBforPostgreSQL/servers', variables('serverName'))]"
+        ],
+        "properties": {
+            "name": "Storate_Alert",
+            "description": "Default alert which notify when storage percent is greater than 80%",
+            "isEnabled": "true",
+            "condition": {
+                "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+                "dataSource": {
+                    "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+                    "resourceUri": "[resourceId('Microsoft.DBforPostgreSQL/servers', variables('serverName'))]",
+                    "metricName": "storage_percent"
+                },
+                "operator": "GreaterThan",
+                "threshold": "80",
+                "windowSize": "00:05:00",
+                "timeAggregation": "Average"
+            },
+          "actions": [
+            {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+              "sendToServiceOwners": "true",
+              "customEmails": "[variables('customEmails')]"
+            }
           ]
         }
-      }
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "apiVersion": "2023-09-01",
-      "name": "[format('{0}/{1}', parameters('virtualNetworkName'), parameters('subnetName'))]",
-      "properties": {
-        "addressPrefix": "[parameters('subnetPrefix')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.DBforPostgreSQL/servers",
-      "apiVersion": "2017-12-01",
-      "name": "[parameters('serverName')]",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[parameters('skuName')]",
-        "tier": "[parameters('skuTier')]",
-        "capacity": "[parameters('skuCapacity')]",
-        "size": "[format('{0}', parameters('skuSizeMB'))]",
-        "family": "[parameters('skuFamily')]"
-      },
-      "properties": {
-        "createMode": "Default",
-        "version": "[parameters('postgresqlVersion')]",
-        "administratorLogin": "[parameters('administratorLogin')]",
-        "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
-        "storageProfile": {
-          "storageMB": "[parameters('skuSizeMB')]",
-          "backupRetentionDays": "[parameters('backupRetentionDays')]",
-          "geoRedundantBackup": "[parameters('geoRedundantBackup')]"
-        },
-        "sslEnforcement": "Enabled",
-        "minimalTlsVersion": "TLS1_2"
-      }
-    },
-    {
-      "copy": {
-        "name": "firewallRules",
-        "count": "[length(variables('firewallrules'))]",
-        "mode": "serial",
-        "batchSize": 1
-      },
-      "type": "Microsoft.DBforPostgreSQL/servers/firewallRules",
-      "apiVersion": "2017-12-01",
-      "name": "[format('{0}/{1}', parameters('serverName'), variables('firewallrules')[copyIndex()].Name)]",
-      "properties": {
-        "startIpAddress": "[variables('firewallrules')[copyIndex()].StartIpAddress]",
-        "endIpAddress": "[variables('firewallrules')[copyIndex()].EndIpAddress]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('serverName'))]"
-      ]
     }
-  ],
-  "outputs": {
-    "name": {
-      "type": "string",
-      "value": "[parameters('serverName')]"
-    },
-    "resourceId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('serverName'))]"
-    },
-    "resourceGroupName": {
-      "type": "string",
-      "value": "[resourceGroup().name]"
-    },
-    "location": {
-      "type": "string",
-      "value": "[parameters('location')]"
-    }
-  }
+  ]
 }
