@@ -1,233 +1,121 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "metadata": {
-    "_generator": {
-      "name": "bicep",
-      "version": "0.9.1.41621",
-      "templateHash": "5060734554184834462"
-    }
-  },
-  "parameters": {
-    "accountName": {
-      "type": "string",
-      "defaultValue": "[format('sql-{0}', uniqueString(resourceGroup().id))]",
-      "metadata": {
-        "description": "Cosmos DB account name, max length 44 characters, lowercase"
-      }
+    "id": "/subscriptions/c19ae2fb-00d5-449d-aabd-237cd4712379/resourceGroups/rgprovisioning/providers/Microsoft.DocumentDB/databaseAccounts/provcosmosdb",
+    "name": "provcosmosdb",
+    "location": "East US",
+    "type": "Microsoft.DocumentDB/databaseAccounts",
+    "kind": "GlobalDocumentDB",
+    "tags": {
+        "defaultExperience": "Core (SQL)",
+        "hidden-cosmos-mmspecial": ""
     },
-    "location": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Location for the Cosmos DB account."
-      }
+    "systemData": {
+        "createdAt": "2024-09-02T23:53:29.1491266Z"
     },
-    "primaryRegion": {
-      "type": "string",
-      "metadata": {
-        "description": "The primary region for the Cosmos DB account."
-      }
-    },
-    "secondaryRegion": {
-      "type": "string",
-      "metadata": {
-        "description": "The secondary region for the Cosmos DB account."
-      }
-    },
-    "defaultConsistencyLevel": {
-      "type": "string",
-      "defaultValue": "Session",
-      "allowedValues": [
-        "Eventual",
-        "ConsistentPrefix",
-        "Session",
-        "BoundedStaleness",
-        "Strong"
-      ],
-      "metadata": {
-        "description": "The default consistency level of the Cosmos DB account."
-      }
-    },
-    "maxStalenessPrefix": {
-      "type": "int",
-      "defaultValue": 100000,
-      "maxValue": 2147483647,
-      "minValue": 10,
-      "metadata": {
-        "description": "Max stale requests. Required for BoundedStaleness. Valid ranges, Single Region: 10 to 2147483647. Multi Region: 100000 to 2147483647."
-      }
-    },
-    "maxIntervalInSeconds": {
-      "type": "int",
-      "defaultValue": 300,
-      "maxValue": 86400,
-      "minValue": 5,
-      "metadata": {
-        "description": "Max lag time (minutes). Required for BoundedStaleness. Valid ranges, Single Region: 5 to 84600. Multi Region: 300 to 86400."
-      }
-    },
-    "systemManagedFailover": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "Enable system managed failover for regions"
-      }
-    },
-    "databaseName": {
-      "type": "string",
-      "metadata": {
-        "description": "The name for the database"
-      }
-    },
-    "containerName": {
-      "type": "string",
-      "metadata": {
-        "description": "The name for the container"
-      }
-    },
-    "autoscaleMaxThroughput": {
-      "type": "int",
-      "defaultValue": 1000,
-      "maxValue": 1000000,
-      "minValue": 1000,
-      "metadata": {
-        "description": "Maximum autoscale throughput for the container"
-      }
-    }
-  },
-  "variables": {
-    "consistencyPolicy": {
-      "Eventual": {
-        "defaultConsistencyLevel": "Eventual"
-      },
-      "ConsistentPrefix": {
-        "defaultConsistencyLevel": "ConsistentPrefix"
-      },
-      "Session": {
-        "defaultConsistencyLevel": "Session"
-      },
-      "BoundedStaleness": {
-        "defaultConsistencyLevel": "BoundedStaleness",
-        "maxStalenessPrefix": "[parameters('maxStalenessPrefix')]",
-        "maxIntervalInSeconds": "[parameters('maxIntervalInSeconds')]"
-      },
-      "Strong": {
-        "defaultConsistencyLevel": "Strong"
-      }
-    },
-    "locations": [
-      {
-        "locationName": "[parameters('primaryRegion')]",
-        "failoverPriority": 0,
-        "isZoneRedundant": false
-      },
-      {
-        "locationName": "[parameters('secondaryRegion')]",
-        "failoverPriority": 1,
-        "isZoneRedundant": false
-      }
-    ]
-  },
-  "resources": [
-    {
-      "type": "Microsoft.DocumentDB/databaseAccounts",
-      "apiVersion": "2022-05-15",
-      "name": "[toLower(parameters('accountName'))]",
-      "kind": "GlobalDocumentDB",
-      "location": "[parameters('location')]",
-      "properties": {
-        "consistencyPolicy": "[variables('consistencyPolicy')[parameters('defaultConsistencyLevel')]]",
-        "locations": "[variables('locations')]",
-        "databaseAccountOfferType": "Standard",
-        "enableAutomaticFailover": "[parameters('systemManagedFailover')]"
-      }
-    },
-    {
-      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
-      "apiVersion": "2022-05-15",
-      "name": "[format('{0}/{1}', toLower(parameters('accountName')), parameters('databaseName'))]",
-      "properties": {
-        "resource": {
-          "id": "[parameters('databaseName')]"
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.DocumentDB/databaseAccounts', toLower(parameters('accountName')))]"
-      ]
-    },
-    {
-      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
-      "apiVersion": "2022-05-15",
-      "name": "[format('{0}/{1}/{2}', toLower(parameters('accountName')), parameters('databaseName'), parameters('containerName'))]",
-      "properties": {
-        "resource": {
-          "id": "[parameters('containerName')]",
-          "partitionKey": {
-            "paths": [
-              "/myPartitionKey"
-            ],
-            "kind": "Hash"
-          },
-          "indexingPolicy": {
-            "indexingMode": "consistent",
-            "includedPaths": [
-              {
-                "path": "/*"
-              }
-            ],
-            "excludedPaths": [
-              {
-                "path": "/myPathToNotIndex/*"
-              },
-              {
-                "path": "/_etag/?"
-              }
-            ],
-            "compositeIndexes": [
-              [
-                {
-                  "path": "/name",
-                  "order": "ascending"
-                },
-                {
-                  "path": "/age",
-                  "order": "descending"
-                }
-              ]
-            ],
-            "spatialIndexes": [
-              {
-                "path": "/path/to/geojson/property/?",
-                "types": [
-                  "Point",
-                  "Polygon",
-                  "MultiPolygon",
-                  "LineString"
-                ]
-              }
-            ]
-          },
-          "defaultTtl": 86400,
-          "uniqueKeyPolicy": {
-            "uniqueKeys": [
-              {
-                "paths": [
-                  "/phoneNumber"
-                ]
-              }
-            ]
-          }
+    "properties": {
+        "provisioningState": "Succeeded",
+        "documentEndpoint": "https://provcosmosdb.documents.azure.com:443/",
+        "sqlEndpoint": "https://provcosmosdb.documents.azure.com:443/",
+        "publicNetworkAccess": "Enabled",
+        "enableAutomaticFailover": false,
+        "enableMultipleWriteLocations": false,
+        "enablePartitionKeyMonitor": false,
+        "isVirtualNetworkFilterEnabled": false,
+        "virtualNetworkRules": [],
+        "EnabledApiTypes": "Sql",
+        "disableKeyBasedMetadataWriteAccess": false,
+        "enableFreeTier": true,
+        "enableAnalyticalStorage": false,
+        "analyticalStorageConfiguration": {
+            "schemaType": "WellDefined"
         },
-        "options": {
-          "autoscaleSettings": {
-            "maxThroughput": "[parameters('autoscaleMaxThroughput')]"
-          }
+        "instanceId": "dfa1aae1-3f4b-41ed-b897-b13a5e6b3672",
+        "databaseAccountOfferType": "Standard",
+        "enableMaterializedViews": false,
+        "defaultIdentity": "FirstPartyIdentity",
+        "networkAclBypass": "None",
+        "disableLocalAuth": false,
+        "enablePartitionMerge": false,
+        "enableBurstCapacity": false,
+        "minimalTlsVersion": "Tls12",
+        "consistencyPolicy": {
+            "defaultConsistencyLevel": "Session",
+            "maxIntervalInSeconds": 5,
+            "maxStalenessPrefix": 100
+        },
+        "configurationOverrides": {
+            "EnablePerRegionPerPartitionAutoscaleOptIn": "True"
+        },
+        "writeLocations": [
+            {
+                "id": "provcosmosdb-eastus",
+                "locationName": "East US",
+                "documentEndpoint": "https://provcosmosdb-eastus.documents.azure.com:443/",
+                "provisioningState": "Succeeded",
+                "failoverPriority": 0,
+                "isZoneRedundant": false
+            }
+        ],
+        "readLocations": [
+            {
+                "id": "provcosmosdb-eastus",
+                "locationName": "East US",
+                "documentEndpoint": "https://provcosmosdb-eastus.documents.azure.com:443/",
+                "provisioningState": "Succeeded",
+                "failoverPriority": 0,
+                "isZoneRedundant": false
+            }
+        ],
+        "locations": [
+            {
+                "id": "provcosmosdb-eastus",
+                "locationName": "East US",
+                "documentEndpoint": "https://provcosmosdb-eastus.documents.azure.com:443/",
+                "provisioningState": "Succeeded",
+                "failoverPriority": 0,
+                "isZoneRedundant": false
+            }
+        ],
+        "failoverPolicies": [
+            {
+                "id": "provcosmosdb-eastus",
+                "locationName": "East US",
+                "failoverPriority": 0
+            }
+        ],
+        "cors": [],
+        "capabilities": [],
+        "ipRules": [],
+        "backupPolicy": {
+            "type": "Periodic",
+            "periodicModeProperties": {
+                "backupIntervalInMinutes": 240,
+                "backupRetentionIntervalInHours": 8,
+                "backupStorageRedundancy": "Geo"
+            }
+        },
+        "networkAclBypassResourceIds": [],
+        "diagnosticLogSettings": {
+            "enableFullTextQuery": "None"
+        },
+        "capacity": {
+            "totalThroughputLimit": 1000
+        },
+        "keysMetadata": {
+            "primaryMasterKey": {
+                "generationTime": "2024-09-02T23:53:29.1491266Z"
+            },
+            "secondaryMasterKey": {
+                "generationTime": "2024-09-02T23:53:29.1491266Z"
+            },
+            "primaryReadonlyMasterKey": {
+                "generationTime": "2024-09-02T23:53:29.1491266Z"
+            },
+            "secondaryReadonlyMasterKey": {
+                "generationTime": "2024-09-02T23:53:29.1491266Z"
+            }
         }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', toLower(parameters('accountName')), parameters('databaseName'))]"
-      ]
+    },
+    "identity": {
+        "type": "None"
     }
-  ]
 }
