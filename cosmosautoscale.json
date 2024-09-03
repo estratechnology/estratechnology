@@ -11,60 +11,11 @@
     "systemData": {
         "createdAt": "2024-09-02T23:53:29.1491266Z"
     },
-    "properties": {
-        "provisioningState": "Succeeded",
-        "documentEndpoint": "https://provcosmosdb.documents.azure.com:443/",
-        "sqlEndpoint": "https://provcosmosdb.documents.azure.com:443/",
-        "publicNetworkAccess": "Enabled",
-        "enableAutomaticFailover": false,
-        "enableMultipleWriteLocations": false,
-        "enablePartitionKeyMonitor": false,
-        "isVirtualNetworkFilterEnabled": false,
-        "virtualNetworkRules": [],
-        "EnabledApiTypes": "Sql",
-        "disableKeyBasedMetadataWriteAccess": false,
-        "enableFreeTier": true,
-        "enableAnalyticalStorage": false,
-        "analyticalStorageConfiguration": {
-            "schemaType": "WellDefined"
-        },
-        "instanceId": "dfa1aae1-3f4b-41ed-b897-b13a5e6b3672",
-        "databaseAccountOfferType": "Standard",
-        "enableMaterializedViews": false,
-        "defaultIdentity": "FirstPartyIdentity",
-        "networkAclBypass": "None",
-        "disableLocalAuth": false,
-        "enablePartitionMerge": false,
-        "enableBurstCapacity": false,
-        "minimalTlsVersion": "Tls12",
-        "consistencyPolicy": {
-            "defaultConsistencyLevel": "Session",
-            "maxIntervalInSeconds": 5,
-            "maxStalenessPrefix": 100
-        },
+   
         "configurationOverrides": {
             "EnablePerRegionPerPartitionAutoscaleOptIn": "True"
         },
-        "writeLocations": [
-            {
-                "id": "provcosmosdb-eastus",
-                "locationName": "East US",
-                "documentEndpoint": "https://provcosmosdb-eastus.documents.azure.com:443/",
-                "provisioningState": "Succeeded",
-                "failoverPriority": 0,
-                "isZoneRedundant": false
-            }
-        ],
-        "readLocations": [
-            {
-                "id": "provcosmosdb-eastus",
-                "locationName": "East US",
-                "documentEndpoint": "https://provcosmosdb-eastus.documents.azure.com:443/",
-                "provisioningState": "Succeeded",
-                "failoverPriority": 0,
-                "isZoneRedundant": false
-            }
-        ],
+       
         "locations": [
             {
                 "id": "provcosmosdb-eastus",
@@ -82,17 +33,7 @@
                 "failoverPriority": 0
             }
         ],
-        "cors": [],
-        "capabilities": [],
-        "ipRules": [],
-        "backupPolicy": {
-            "type": "Periodic",
-            "periodicModeProperties": {
-                "backupIntervalInMinutes": 240,
-                "backupRetentionIntervalInHours": 8,
-                "backupStorageRedundancy": "Geo"
-            }
-        },
+        
         "networkAclBypassResourceIds": [],
         "diagnosticLogSettings": {
             "enableFullTextQuery": "None"
@@ -100,21 +41,7 @@
         "capacity": {
             "totalThroughputLimit": 1000
         },
-        "keysMetadata": {
-            "primaryMasterKey": {
-                "generationTime": "2024-09-02T23:53:29.1491266Z"
-            },
-            "secondaryMasterKey": {
-                "generationTime": "2024-09-02T23:53:29.1491266Z"
-            },
-            "primaryReadonlyMasterKey": {
-                "generationTime": "2024-09-02T23:53:29.1491266Z"
-            },
-            "secondaryReadonlyMasterKey": {
-                "generationTime": "2024-09-02T23:53:29.1491266Z"
-            }
-        }
-    },
+        
     "identity": {
         "type": "None"
     }
